@@ -1,7 +1,8 @@
 # AI-Powered Student Performance Analytics System
-### Dev2 Instruction Sheet — ML, Visualisation & Dashboard
 
-**Repository:** https://github.com/Faris075/software-testing-project/  
+## Dev2 Instruction Sheet — ML, Visualisation & Dashboard
+
+**Repository:** <https://github.com/Faris075/software-testing-project/>  
 **Project Date:** 2026  
 **Your counterpart's sheet:** `INSTRUCTIONS_DEV1.md`
 
@@ -10,7 +11,7 @@
 ## Your Responsibilities at a Glance
 
 | Task | Phase | File(s) |
-|---|---|---|
+| --- | --- | --- |
 | Data visualisation (all charts) | Phase 4 | `visualisation/charts.py` |
 | ML models — regression + classification | Phase 5 | `models/train.py`, `models/predict.py` |
 | Model evaluation | Phase 6 | `models/evaluate.py` |
@@ -49,6 +50,7 @@ This system works with **two complementary datasets**:
 **Your role** is to own the ML pipeline: you build all charts, train and save models for both prediction tasks, evaluate model quality, and wire up your tabs in the shared Streamlit dashboard.
 
 ### Dataset 1 — Synthetic Cohort (Marks)
+
 - **Students:** 15 (IDs: `S001` – `S015`)
 - **Subjects:** Math, Physics, CS, English, Statistics
 - **Years:** 2024, 2025 (historical) → 2026 (predicted)
@@ -56,6 +58,7 @@ This system works with **two complementary datasets**:
 - **File:** `data/students_clean.csv` (produced by Dev1's `preprocessing/clean.py`)
 
 ### Dataset 2 — Real VLE Dataset (Pass/Fail)
+
 - **Instances:** 160 students (136 pass, 24 fail — **imbalanced**)
 - **Features:** 19 (8 behaviour + 11 neighbourhood/contextual)
 - **Label:** `label` — 0 = pass, 1 = fail
@@ -65,7 +68,7 @@ This system works with **two complementary datasets**:
 #### VLE Feature Reference
 
 | Feature | Description |
-|---|---|
+| --- | --- |
 | `gender` | 0 = male, 1 = female |
 | `age` | Student age at week 6 |
 | `logins` | Count of module area logins |
@@ -91,7 +94,7 @@ This system works with **two complementary datasets**:
 ## 2. Tech Stack
 
 | Category | Library / Tool | Your usage |
-|---|---|---|
+| --- | --- | --- |
 | Data handling | `pandas`, `numpy` | Feature engineering, data loading |
 | Visualisation | `matplotlib`, `seaborn` | All chart functions |
 | Machine learning | `scikit-learn` | Regression + classification models |
@@ -122,7 +125,7 @@ pip install -r requirements.txt
 
 ### Your branches
 
-```
+```text
 main           ← protected; only accepts PRs
 ├── dev        ← shared integration branch
 │   ├── feature/dev2-visualisation     ← your Phase 4 work
@@ -166,7 +169,7 @@ git push origin main
 
 Focus on the folders/files you own:
 
-```
+```text
 software-testing-project/
 ├── data/
 │   ├── students_clean.csv             ← read from Dev1 (clean.py output)
@@ -207,7 +210,7 @@ software-testing-project/
 
 ### requirements.txt (already in repo)
 
-```
+```text
 pandas>=2.1.0
 numpy>=1.26.0
 matplotlib>=3.8.0
@@ -254,7 +257,7 @@ CHARTS_DIR.mkdir(parents=True, exist_ok=True)
 Every function accepts an optional `ax=None`. When `ax is None`, create a new figure, save it to `outputs/charts/`, and return the `fig`.
 
 | Function signature | Chart type | Description |
-|---|---|---|
+| --- | --- | --- |
 | `bar_subject_averages(df, ax=None)` | Bar | Average mark per subject across all students |
 | `bar_student_averages(df, year, ax=None)` | Bar | Average mark per student for a given year |
 | `line_progress(df, student_id, ax=None)` | Line | 2024 → 2025 per-subject progression for one student |
@@ -464,7 +467,7 @@ streamlit run dashboard/app.py
 
 You are responsible for the following parts of the layout:
 
-```
+```text
 Main area — Marks Cohort view
   └── [Tab 3] 2026 Predictions                           ← YOU build this
         ├── Sidebar: model selector (LinearRegression / DecisionTree / RandomForest)
@@ -535,7 +538,7 @@ with vle_tab2:
 ### Synthetic Cohort — Wide-format CSV (`students_clean.csv`)
 
 | student_id | name | year | Math | Physics | CS | English | Statistics |
-|---|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- | --- |
 | S001 | Ali | 2024 | 78.0 | 65.0 | 82.0 | 71.0 | 69.0 |
 | S001 | Ali | 2025 | 81.0 | 68.0 | 85.0 | 74.0 | 72.0 |
 
@@ -551,7 +554,7 @@ The raw CSV from `data/vle/` has verbose headers. Use `database/db_utils.py`'s `
 
 ### Commit message format
 
-```
+```text
 <type>(<scope>): <short description>
 
 Types: feat | fix | docs | test | refactor | chore
@@ -566,6 +569,7 @@ feat(dashboard): wire VLE at-risk predictor tab
 ```
 
 ### PR rules
+
 - Title must follow the format above.
 - Every PR needs Dev1 as reviewer.
 - PR description must say: what changed + how to test it locally.
@@ -582,6 +586,7 @@ pytest tests/test_models.py tests/test_predict.py tests/test_vle.py -v
 ```
 
 ### tests/test_models.py
+
 - [ ] `test_model_trains_without_error` — all 3 regression models fit without exception
 - [ ] `test_pkl_files_saved` — `saved_models/LinearRegression_Math.pkl` (and others) exist after training
 - [ ] `test_rmse_reasonable` — RMSE < 20 for all regression models (sanity check)
@@ -589,12 +594,14 @@ pytest tests/test_models.py tests/test_predict.py tests/test_vle.py -v
 - [ ] `test_classifier_pkl_saved` — `saved_models/classifier_LogisticRegression.pkl` and `classifier_RandomForest.pkl` exist
 
 ### tests/test_predict.py
+
 - [ ] `test_predict_returns_five_subjects` — `predict_2026()` output dict has exactly 5 keys
 - [ ] `test_predicted_marks_in_range` — all values in the output of `predict_2026()` are in [0, 100]
 - [ ] `test_predict_pass_fail_output_type` — `predict_pass_fail()` returns a tuple of `(int, float)`
 - [ ] `test_predict_pass_fail_probability_range` — fail probability is in [0.0, 1.0]
 
 ### tests/test_vle.py
+
 - [ ] `test_vle_seed_row_count` — `vle_students` table has 160 rows after seeding
 - [ ] `test_vle_class_distribution` — 136 pass (0), 24 fail (1) in the seeded data
 - [ ] `test_classifier_recall_fail_nonzero` — recall for class 1 (fail) > 0 — model does not ignore minority class
@@ -607,22 +614,25 @@ pytest tests/test_models.py tests/test_predict.py tests/test_vle.py -v
 After the initial version ships, these improvements are assigned to you:
 
 ### High priority
+
 | # | Enhancement |
-|---|---|
+| --- | --- |
 | 2 | **Neural Network model** — add `MLPRegressor` from scikit-learn as a 4th regression model. Train per-subject, save `.pkl`, include in `evaluate_all_models()`. |
 | 3 | **Hyperparameter tuning** — wrap `DecisionTreeRegressor` and `RandomForestRegressor` with `GridSearchCV`. Log best params to a JSON file. |
 | 4 | **Confidence intervals** — for the Random Forest regressor, use per-tree predictions (`estimators_`) to produce a 95% interval. Display as error bars in `bar_predictions_2026()`. |
 
 ### Medium priority
+
 | # | Enhancement |
-|---|---|
+| --- | --- |
 | 7 | **Grade classification** — alongside the numeric 2026 prediction, add a classifier that outputs a letter grade (A/B/C/D/F). Train using binned 2025 marks as targets. |
 | 9 | **Docker containerisation** — write `Dockerfile` and `docker-compose.yml` (coordinate with Dev1). |
 | 10 | **Scheduled re-training** — use `APScheduler` within the Streamlit app to auto-retrain models whenever new marks are inserted into the DB. |
 
 ### Lower priority
+
 | # | Enhancement |
-|---|---|
+| --- | --- |
 | 12 | Add dark/light mode toggle via `st.set_page_config(theme=...)` and a sidebar toggle. |
 | 13 | Add an Arabic language toggle to the dashboard using a dict-based translation layer. |
 | 15 | Set up GitHub Actions CI — create `.github/workflows/ci.yml` to run `pytest` on every push (YAML below). |
@@ -671,4 +681,4 @@ Verify every item before the final PR to `main`:
 
 ---
 
-*Last updated: April 26, 2026*
+Last updated: April 26, 2026

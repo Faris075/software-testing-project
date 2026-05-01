@@ -244,12 +244,22 @@ def seed_vle_dataset(conn: sqlite3.Connection) -> None:
 # Main
 # ---------------------------------------------------------------------------
 
+def _clear_tables(conn: sqlite3.Connection) -> None:
+    """Delete all rows from data tables so re-seeding is idempotent."""
+    cursor = conn.cursor()
+    for table in ("vle_predictions", "vle_students", "predictions", "marks", "students"):
+        cursor.execute(f"DELETE FROM {table}")
+    conn.commit()
+
+
 def main() -> None:
     print(f"[seed] Connecting to {DB_PATH}")
     conn = get_connection()
 
     print("[seed] Applying schema...")
     apply_schema(conn)
+
+    _clear_tables(conn)
 
     print("[seed] Seeding synthetic cohort marks...")
     seed_synthetic_cohort(conn)

@@ -12,7 +12,7 @@ SAVED_MODELS = ROOT / "saved_models"
 
 def test_model_trains_without_error():
     train_regression_models()
-    for model_name in REGRESSION_MODELS:
+    for model_name in REGRESSION_MODEL_FACTORIES:
         for subject in ["Math", "Physics", "CS", "English", "Statistics"]:
             assert (SAVED_MODELS / f"{model_name}_{subject}.pkl").exists()
 

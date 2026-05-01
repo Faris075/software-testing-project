@@ -2,6 +2,14 @@ import pathlib
 import streamlit as st
 from pandas import DataFrame
 
+from analysis.stats import (
+    correlation_matrix,
+    failing_students,
+    student_summary,
+    subject_summary,
+    top_performers,
+    year_on_year_change,
+)
 from models.evaluate import evaluate_all_classifiers, evaluate_all_models
 from models.predict import predict_2026, predict_pass_fail
 from models.train import (
@@ -12,6 +20,7 @@ from models.train import (
     load_clean_marks,
     load_vle_train_test,
 )
+from report.generate_pdf import generate_report
 from visualisation.charts import (
     bar_predictions_2026,
     bar_student_averages,
@@ -74,29 +83,76 @@ def main() -> None:
     vle_df = _safe_load_vle_original()
 
     if dataset_option == "Marks Cohort":
-        tab1, tab2, tab3 = st.tabs(["Overview", "Student Profile", "2026 Predictions"])
+        tab1, tab2, tab3, tab4 = st.tabs(["Overview", "Student Profile", "2026 Predictions", "Export"])
 
         with tab1:
             st.header("Marks cohort overview")
+
+            # KPI cards
+            summ_df = student_summary(marks_df)
+            class_avg = round(marks_df[SUBJECTS].mean().mean(), 2)
+            top_df = top_performers(marks_df, n=1)
+            top_name = top_df.iloc[0]["name"] if not top_df.empty else "—"
+            top_avg = top_df.iloc[0]["overall_mean"] if not top_df.empty else 0
+
+            yoy_df = year_on_year_change(marks_df)
+            if not yoy_df.empty:
+                best_imp_idx = yoy_df["overall_delta"].idxmax()
+                most_improved = yoy_df.loc[best_imp_idx, "name"]
+                most_improved_delta = yoy_df.loc[best_imp_idx, "overall_delta"]
+            else:
+                most_improved = "—"
+                most_improved_delta = 0
+
+            kpi1, kpi2, kpi3 = st.columns(3)
+            kpi1.metric("Class average", f"{class_avg:.1f}")
+            kpi2.metric("Top student", top_name, f"avg {top_avg:.1f}")
+            kpi3.metric("Most improved", most_improved, f"Δ {most_improved_delta:+.2f}")
+
+            st.divider()
             col1, col2 = st.columns(2)
             with col1:
                 st.subheader("Subject averages")
                 fig = bar_subject_averages(marks_df)
                 st.pyplot(fig)
             with col2:
-                st.subheader("Class progress")
-                fig = line_class_progress(marks_df)
-                st.pyplot(fig)
+                st.subheader("Subject correlation")
+                corr = correlation_matrix(marks_df)
+                fig2 = heatmap_correlation(corr)
+                st.pyplot(fig2)
 
         with tab2:
             student_id = st.selectbox("Select student", students)
-            st.header(f"Profile for {student_id}")
+            st.header(f"Profile: {student_id}")
             student_rows = marks_df[marks_df["student_id"] == student_id].sort_values("year")
+
+            # Stats tables
+            s_summ = summ_df[summ_df["student_id"] == student_id][
+                ["year", "overall_mean", "best_subject", "worst_subject"]
+            ]
+            st.subheader("Year summary")
+            st.table(s_summ.set_index("year"))
+
+            st.subheader("Subject-level stats (all cohort)")
+            st.table(subject_summary(marks_df).set_index("subject"))
+
+            st.subheader("Mark history")
             st.table(student_rows[["year"] + SUBJECTS].set_index("year"))
-            comparison_bar(marks_df, student_id)
-            st.pyplot()
-            line_progress(marks_df, student_id)
-            st.pyplot()
+
+            col_a, col_b = st.columns(2)
+            with col_a:
+                fig3 = comparison_bar(marks_df, student_id)
+                st.pyplot(fig3)
+            with col_b:
+                fig4 = line_progress(marks_df, student_id)
+                st.pyplot(fig4)
+
+            # Failing alert
+            fail_df = failing_students(marks_df, threshold=50.0)
+            student_fails = fail_df[fail_df["student_id"] == student_id]
+            if not student_fails.empty:
+                subjects_below = ", ".join(student_fails["subject"].tolist())
+                st.error(f"Warning: {student_id} has average below 50 in: {subjects_below}")
 
         with tab3:
             st.header("Predict 2026 marks")
@@ -119,6 +175,30 @@ def main() -> None:
                     st.dataframe(eval_df)
                 except Exception as exc:
                     st.warning(f"Could not load evaluation metrics: {exc}")
+
+        with tab4:
+            st.header("Export Report")
+            st.write("Generate a full PDF report covering all students, statistics, charts, and model evaluation.")
+            if st.button("Generate PDF Report"):
+                with st.spinner("Building report…"):
+                    try:
+                        # Save charts first so they are embedded in the PDF
+                        from visualisation.charts import _save
+                        import matplotlib
+                        matplotlib.use("Agg")
+                        _save(bar_subject_averages(marks_df), "bar_subject_averages")
+                        _save(heatmap_correlation(correlation_matrix(marks_df)), "heatmap_correlation")
+                        pdf_path = generate_report()
+                        st.success(f"Report saved to: {pdf_path}")
+                        with open(pdf_path, "rb") as fh:
+                            st.download_button(
+                                label="Download PDF",
+                                data=fh.read(),
+                                file_name="student_performance_report.pdf",
+                                mime="application/pdf",
+                            )
+                    except Exception as exc:
+                        st.error(f"Report generation failed: {exc}")
 
     else:
         st.header("VLE pass/fail analytics")
