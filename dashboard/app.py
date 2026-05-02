@@ -107,7 +107,7 @@ def main() -> None:
             kpi1, kpi2, kpi3 = st.columns(3)
             kpi1.metric("Class average", f"{class_avg:.1f}")
             kpi2.metric("Top student", top_name, f"avg {top_avg:.1f}")
-            kpi3.metric("Most improved", most_improved, f"Δ {most_improved_delta:+.2f}")
+            kpi3.metric("Most improved", str(most_improved), f"Δ {most_improved_delta:+.2f}")
 
             st.divider()
             col1, col2 = st.columns(2)
@@ -122,7 +122,7 @@ def main() -> None:
                 st.pyplot(fig2)
 
         with tab2:
-            student_id = st.selectbox("Select student", students)
+            student_id = str(st.selectbox("Select student", students))
             st.header(f"Profile: {student_id}")
             student_rows = marks_df[marks_df["student_id"] == student_id].sort_values("year")
 
@@ -156,7 +156,7 @@ def main() -> None:
 
         with tab3:
             st.header("Predict 2026 marks")
-            student_id = st.selectbox("Student for prediction", students, key="pred_student")
+            student_id = str(st.selectbox("Student for prediction", students, key="pred_student"))
             model_name = st.selectbox("Regression model", ["LinearRegression", "DecisionTree", "RandomForest"], key="reg_model")
             row_2025 = marks_df[(marks_df["student_id"] == student_id) & (marks_df["year"] == 2025)]
             if row_2025.empty:
@@ -262,7 +262,7 @@ def main() -> None:
                         X_test = test_df[get_vle_feature_columns(test_df)].fillna(0).values
                         scaler = joblib.load(ROOT / "saved_models" / "vle_scaler.pkl")
                         X_test_scaled = scaler.transform(X_test)
-                        y_test = test_df["label"].astype(int).values
+                        y_test = test_df["label"].to_numpy(dtype=int)
                         from sklearn.metrics import confusion_matrix, roc_auc_score, roc_curve
                         y_pred = model.predict(X_test_scaled)
                         proba = model.predict_proba(X_test_scaled)[:, 1] if hasattr(model, "predict_proba") else None
@@ -271,7 +271,7 @@ def main() -> None:
                         st.pyplot(fig_cm)
                         if proba is not None:
                             fpr, tpr, _ = roc_curve(y_test, proba)
-                            auc = roc_auc_score(y_test, proba)
+                            auc = float(roc_auc_score(y_test, proba))
                             fig_roc = plot_roc_curve(fpr, tpr, auc, model_name)
                             st.pyplot(fig_roc)
             except Exception as exc:
