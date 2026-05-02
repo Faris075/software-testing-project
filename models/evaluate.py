@@ -41,7 +41,7 @@ def mae(y_true, y_pred) -> float:
 def cross_validate_model(model, X, y, cv: int = 5) -> Dict[str, float]:
     scores = cross_val_score(model, X, y, scoring="neg_mean_squared_error", cv=cv)
     rmses = np.sqrt(-scores)
-    return {"mean": float(rmses.mean()), "std": float(rmses.std())}
+    return {"CV_RMSE_mean": float(rmses.mean()), "CV_RMSE_std": float(rmses.std())}
 
 
 def evaluate_all_models() -> pd.DataFrame:

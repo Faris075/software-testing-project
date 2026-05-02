@@ -216,10 +216,10 @@ def main() -> None:
                 st.metric("Pass count", passes)
                 st.metric("Fail count", fails)
                 st.metric("Fail rate", f"{fails / max(1, len(vle_df)):.1%}")
-                bar_vle_class_distribution(vle_df)
-                st.pyplot()
-                heatmap_vle_correlation(vle_df)
-                st.pyplot()
+                fig_dist = bar_vle_class_distribution(vle_df)
+                st.pyplot(fig_dist)
+                fig_corr = heatmap_vle_correlation(vle_df)
+                st.pyplot(fig_corr)
 
         with tab2:
             st.subheader("Predict student risk")
@@ -240,8 +240,8 @@ def main() -> None:
                         rf_model = None
                     if rf_model is not None and hasattr(rf_model, "feature_importances_"):
                         feature_names = list(feature_row.keys())
-                        bar_feature_importance(rf_model.feature_importances_, feature_names)
-                        st.pyplot()
+                        fig_fi = bar_feature_importance(rf_model.feature_importances_, feature_names)
+                        st.pyplot(fig_fi)
                 except Exception as exc:
                     st.error(f"Prediction failed: {exc}")
 
@@ -267,13 +267,13 @@ def main() -> None:
                         y_pred = model.predict(X_test_scaled)
                         proba = model.predict_proba(X_test_scaled)[:, 1] if hasattr(model, "predict_proba") else None
                         cm = confusion_matrix(y_test, y_pred)
-                        plot_confusion_matrix(cm, model_name)
-                        st.pyplot()
+                        fig_cm = plot_confusion_matrix(cm, model_name)
+                        st.pyplot(fig_cm)
                         if proba is not None:
                             fpr, tpr, _ = roc_curve(y_test, proba)
                             auc = roc_auc_score(y_test, proba)
-                            plot_roc_curve(fpr, tpr, auc, model_name)
-                            st.pyplot()
+                            fig_roc = plot_roc_curve(fpr, tpr, auc, model_name)
+                            st.pyplot(fig_roc)
             except Exception as exc:
                 st.warning(f"Evaluation metrics unavailable: {exc}")
 

@@ -44,3 +44,11 @@ def test_classifier_recall_fail_nonzero():
     train_vle_classifiers()
     df = evaluate_all_classifiers()
     assert (df["recall_fail"] > 0).all()
+
+
+def test_evaluate_all_classifiers_columns():
+    _ensure_seeded()
+    train_vle_classifiers()
+    df = evaluate_all_classifiers()
+    expected = {"model", "accuracy", "f1_macro", "roc_auc", "recall_fail"}
+    assert expected.issubset(set(df.columns))
