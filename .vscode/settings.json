@@ -1,6 +1,8 @@
 {
+  "python.defaultInterpreterPath": "C:\\Python314\\python.exe",
   "python.analysis.extraPaths": [
-    "c:\\Users\\Omen\\.vscode\\extensions\\hydrologicengineeringcenter.hec-jython-0.0.2\\stubs",
-    "c:\\Users\\Omen\\.vscode\\extensions\\hydrologicengineeringcenter.hec-jython-0.0.2\\jython_files"
-  ]
+    "C:\\Users\\Omen\\AppData\\Roaming\\Python\\Python314\\site-packages",
+    "C:\\Python314\\Lib\\site-packages"
+  ],
+  "python-envs.defaultEnvManager": "ms-python.python:system"
 }
