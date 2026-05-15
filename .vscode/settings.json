@@ -2,5 +2,10 @@
   "python.analysis.extraPaths": [
     "c:\\Users\\Omen\\.vscode\\extensions\\hydrologicengineeringcenter.hec-jython-0.0.2\\stubs",
     "c:\\Users\\Omen\\.vscode\\extensions\\hydrologicengineeringcenter.hec-jython-0.0.2\\jython_files"
-  ]
+  ],
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
 }
