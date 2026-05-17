@@ -4,5 +4,10 @@
     "C:\\Users\\Omen\\AppData\\Roaming\\Python\\Python314\\site-packages",
     "C:\\Python314\\Lib\\site-packages"
   ],
-  "python-envs.defaultEnvManager": "ms-python.python:system"
+  "python-envs.defaultEnvManager": "ms-python.python:system",
+  "python.testing.pytestArgs": [
+    "tests"
+  ],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
 }

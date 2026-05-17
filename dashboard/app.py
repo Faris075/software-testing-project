@@ -1,4 +1,11 @@
 import pathlib
+import sys
+
+# Add parent directory to path so imports work when Streamlit runs this
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 import streamlit as st
 from pandas import DataFrame
 
@@ -36,8 +43,6 @@ from visualisation.charts import (
     plot_roc_curve,
     scatter_actual_vs_predicted,
 )
-
-ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 
 def _safe_load_vle_original() -> DataFrame:
